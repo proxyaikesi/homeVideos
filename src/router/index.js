@@ -51,7 +51,7 @@ const routes = [
          {
             path: 'upload',
             meta: {
-               title: '上传文件',
+               title: '上传文件aaaaaaaaaaa',
             },
             name:'upload',
             component:Upload,
