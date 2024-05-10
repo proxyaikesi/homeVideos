@@ -66,37 +66,37 @@ const { promises } = require('dns');
 
 
 
-const { TikTokScraper } = require('tiktok-scraper');
+// const { TikTokScraper } = require('tiktok-scraper');
 
 // Username of someone who has posted videos
-let tiktokUsername = "koung402";
+// let tiktokUsername = "koung402";
 
 // Create a scraper instance
-let scraper = new TikTokScraper();
+// let scraper = new TikTokScraper();
 
 // Get the session value
-let session = scraper.getSession();
+// let session = scraper.getSession();
 
 // Set the session value
-scraper.setSession(session);
+// scraper.setSession(session);
 
-// Scrape videos from the username
-scraper.user(tiktokUsername, { 
-    // Number of posts to scrape
-    number: 50,
-    // Download video files without the watermark
-    noWaterMark: true,
-    // Save video files to a ZIP archive
-    zip: true,
-    // File name for the ZIP archive
-    fileName: "videos.zip"
-}).then(data => {
-    // Do something with the data
-    console.log(data);
-}).catch(err => {
-    // Handle error
-    console.error(err);
-});
+// // Scrape videos from the username
+// scraper.user(tiktokUsername, { 
+//     // Number of posts to scrape
+//     number: 50,
+//     // Download video files without the watermark
+//     noWaterMark: true,
+//     // Save video files to a ZIP archive
+//     zip: true,
+//     // File name for the ZIP archive
+//     fileName: "videos.zip"
+// }).then(data => {
+//     // Do something with the data
+//     console.log(data);
+// }).catch(err => {
+//     // Handle error
+//     console.error(err);
+// });
 
 
 
