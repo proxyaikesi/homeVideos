@@ -1,5 +1,6 @@
 <template>
-    <video id="videos" ref="refmp4"   preload="auto" :src="mp4Url" >
+    <video id="videos" ref="refmp4" autoplay preload="auto" :src="mp4Url" >
+        <!-- {{ mp4Url }} -->
         <source src="999">
     </video>
 </template>
@@ -18,9 +19,10 @@ export default {
         const refmp4 = ref(Array);
         num.videoNum = props.isplay
         onUpdated(() => {
+            // console.log(' 77777777777777777777777777777777.value', refmp4.value);
             if (props.inNum == props.isplay) {
                 num.videoNum = props.isplay
-                console.log(' refmp4.value', refmp4.value);
+                
                 setTimeout(()=>{
                     refmp4.value.play()
                     

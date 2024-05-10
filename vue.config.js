@@ -13,6 +13,7 @@ module.exports = defineConfig({
     externals: {
       'AMap': 'AMap'
     },
+    // changeOrigin: true,
     performance: {
       hints:false
     }

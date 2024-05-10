@@ -11,7 +11,7 @@
         
 
         </Video>
- 
+        <!-- <h2 style="color: brown; font-size: 50px;">{{  videolist.newArr }}</h2> -->
 
 
     </div>
@@ -24,7 +24,7 @@ import { videoPlay } from 'vue3-video-play'
 import 'vue3-video-play/dist/style.css'
 import Video from './video.vue'
 import { onBeforeMount, getCurrentInstance, ref, reactive, onUpdated, onMounted, nextTick, } from "vue";
-
+import { useStore } from 'vuex'
 import axios from 'axios'
 export default ({
   components: {
@@ -42,20 +42,26 @@ export default ({
       fnList()
 
     });
+    const store = useStore()
     function fnList() {
-      axios.get('http://localhost:3000/getVideo').then((el) => {
-        videolist.arrList = el.data.item.sort(()=> 0.5 - Math.random())
-        console.log( videolist.arrList);
-      
-        addList(5)
+      axios.post('http://localhost:3000/videoManage',{
+        params: {
+                id: store.state.userInfo._id
+            }
+      }).then((el) => {
+        videolist.arrList = el.data.newdata.sort(()=> 0.5 - Math.random())
+        // console.log( el.data.newdata.length);
+        // console.log( 'el',el);
+        addList( el.data.newdata.length)
       })
     }
     function addList(nums) {
       let num = 0
 
-      if (videolist.arrList.length > 5) {
-        console.log('ssssss啊实打实的');
-        videolist.newArr = videolist.arrList.slice(0, videolist.everyTime)
+      if (nums > num) {
+        console.log('sssssssssss',nums);
+        // videolist.newArr = videolist.arrList.slice(0, videolist.everyTime)
+        videolist.newArr = nums > 5 ?  videolist.arrList.slice(0 , nums) : nums
       }
 
     }

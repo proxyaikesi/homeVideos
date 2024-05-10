@@ -1,6 +1,6 @@
 var mongoose = require('mongoose')
-var timestamps = require('moment-timezone');
-console.log('上海：'+timestamps().tz("Asia/Shanghai").format('YYYY/MM/DD HH:mm:ss'))
+// var timestamps = require('moment-timezone');
+// console.log('上海：'+timestamps().tz("Asia/Shanghai").format('YYYY/MM/DD HH:mm:ss'))
 const { Schema } = mongoose;
 var videoinfo = new mongoose.Schema({
     classify: String,

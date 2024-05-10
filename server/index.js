@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const fs = require('fs')
 const uploadhome = require('./routers/uploadhome')
 const uploader = require("express-fileupload");
-
+const db = require('./db.js')
 const puppeteer = require('puppeteer');
 
 const http = require('http')
@@ -47,6 +47,7 @@ app.all('*', function (req, res, next) {
         "Last-Modified, Cache-Control, Expires, Content-Type, Content-Language, Cache-Control, X-E4M-With,X_FILENAME");
     res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
     res.header("Content-Type", "application/json;charset=utf-8");
+    // res.header("Access-Control-Allow-Origin", "*");
     next();
 })
 app.post('/register', require('./routers/register')) // 注册
@@ -55,48 +56,49 @@ app.post('/videoInfo', require('./routers/videoInfo')) // 视频信息上传
 app.post('/uploadhome', require('./routers/uploadhome')) // 视频上传
 app.post('/deleteInfo', require('./routers/deleteInfo')) // // 删除视频
 app.post('/videoManage', require('./routers/videoManage')) // 查找公开视频
+
 app.post('/unpublished', require('./routers/Unpublished')) // 查找未公开视频
 app.post('/deleteVideoInfo', require('./routers/deleteVideoInfo')) // 删除视频信息表
 app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 
 
-const superagent = require('superagent');
-const { promises } = require('dns');
+// const superagent = require('superagent');
+// const { promises } = require('dns');
 
 
 
 
-const { TikTokScraper } = require('tiktok-scraper');
+// const { TikTokScraper } = require('tiktok-scraper');
 
-// Username of someone who has posted videos
-let tiktokUsername = "koung402";
+// // Username of someone who has posted videos
+// let tiktokUsername = "koung402";
 
-// Create a scraper instance
-let scraper = new TikTokScraper();
+// // Create a scraper instance
+// let scraper = new TikTokScraper();
 
-// Get the session value
-let session = scraper.getSession();
+// // Get the session value
+// let session = scraper.getSession();
 
-// Set the session value
-scraper.setSession(session);
+// // Set the session value
+// scraper.setSession(session);
 
-// Scrape videos from the username
-scraper.user(tiktokUsername, { 
-    // Number of posts to scrape
-    number: 50,
-    // Download video files without the watermark
-    noWaterMark: true,
-    // Save video files to a ZIP archive
-    zip: true,
-    // File name for the ZIP archive
-    fileName: "videos.zip"
-}).then(data => {
-    // Do something with the data
-    console.log(data);
-}).catch(err => {
-    // Handle error
-    console.error(err);
-});
+// // Scrape videos from the username
+// scraper.user(tiktokUsername, { 
+//     // Number of posts to scrape
+//     number: 50,
+//     // Download video files without the watermark
+//     noWaterMark: true,
+//     // Save video files to a ZIP archive
+//     zip: true,
+//     // File name for the ZIP archive
+//     fileName: "videos.zip"
+// }).then(data => {
+//     // Do something with the data
+//     console.log(data);
+// }).catch(err => {
+//     // Handle error
+//     console.error(err);
+// });
 
 
 
