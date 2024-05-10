@@ -11,8 +11,6 @@ import locale from 'element-plus/dist/locale/zh-cn.mjs'
 // import VueAMap from "vue-amap";
 
 
-import vue3videoPlay from 'vue3-video-play' // 引入组件
-import 'vue3-video-play/dist/style.css' // 引入css
 
 
 
@@ -23,7 +21,7 @@ import 'vue3-video-play/dist/style.css' // 引入css
 const app = createApp(App)
 
 // app.config.globalProperties.$echarts = echarts
-app.use(store).use(router, qs,).use(vue3videoPlay).use(element,{locale}).mount('#app')
+app.use(store).use(router, qs,).use().use(element,{locale}).mount('#app')
 // VueAMap.initAMapApiLoader({
 //     key: 'b10ba7467979b474bd30bc1c313fd58a',
 //     plugin: ['AMap.Scale', 'AMap.OverView', 'AMap.ToolBar', 'AMap.MapType',],
