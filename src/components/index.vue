@@ -41,7 +41,7 @@ export default ({
     const childRef = ref(null);
     const callChildMethod = () => {
 
-      console.log('sssssss', child.value[videolist.currentVideoIndex].isplayer = false);
+      // console.log('sssssss', child.value[videolist.currentVideoIndex].isplayer = false);
 
     };
 
@@ -49,7 +49,7 @@ export default ({
       fnList()
     });
     function handlePlay(index) {
-      console.log(index, '撒啊啊啊啊啊啊啊啊');
+      // console.log(index, '撒啊啊啊啊啊啊啊啊');
       if (videolist.currentVideoIndex !== index) {
         videolist.currentVideoIndex = index;
         // 暂停其他视频
@@ -64,7 +64,7 @@ export default ({
     function fnList() {
       axios.get('http://localhost:3000/getVideo').then((el) => {
         videolist.arrList = el.data.item.sort(() => 0.5 - Math.random())
-        console.log(videolist.arrList);
+        // console.log(videolist.arrList);
 
         addList(5)
       })
@@ -72,7 +72,7 @@ export default ({
     function addList(nums) {
       let num = 0
       if (videolist.arrList.length > 5) {
-        console.log('ssssss啊实打实的');
+        // console.log('ssssss啊实打实的');
         videolist.newArr = videolist.arrList.slice(0, videolist.everyTime)
       }
 
@@ -114,7 +114,7 @@ export default ({
 
       videolist.currentVideoIndex = (videolist.currentVideoIndex + 1) % videolist.arrList.length;
       // console.log(videolist.currentVideoIndex, '下面',child.value[videolist.currentVideoIndex].someMethod());
-      console.log(videolist.currentVideoIndex, '下面',child.value[videolist.currentVideoIndex].isplay);
+      // console.log(videolist.currentVideoIndex, '下面',child.value[videolist.currentVideoIndex].isplay);
       // console.log(child.value[videolist.currentVideoIndex].handleSpacebar());
       directToMove(videolist.currentVideoIndex)
     }

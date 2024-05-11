@@ -8,7 +8,7 @@
         </keep-alive>
         <div class="control-box">
             <div class="control">
-                <div class="progress-box" @mouseover="handleMouseOver" @mouseleave="handleMouseLeave">
+                <div class="progress-box" @mouseover="isShow = true" @mouseleave="isShow = false">
                     <div ref="bar_cont" class="progress-bar-container" :class="{ active: isShow }"
                         @mousedown="handleMouseDown">
                         <div class="progress-bar" :style="{ width: state.progressBarWidth + '%' }"
@@ -74,15 +74,18 @@ export default ({
 
             }
         });
+        // 暂停 播放 控制
         const toggleVideo = () => {
-
-            if (!isplayer.value) {
+            if (isplayer.value == false) {
                 videoRef.value.play();
-                console.log('ddddddddddddddddddddddddddddddddddddd');
+                videoRef.value.currentTime = 0;
+                console.log('video鼠标点击播放');
                 isplayer.value = true
+                
 
             } else {
                 videoRef.value.pause();
+                console.log('video鼠标点击暂停');
                 isplayer.value = false
             }
         };
@@ -99,19 +102,20 @@ export default ({
         })
         // 组件挂载时添加事件监听
         onMounted(() => {
-            window.addEventListener('keydown', handleSpacebar);
+            document.addEventListener('keydown', handleSpacebar);
         });
 
         // 组件卸载时移除事件监听
         onUnmounted(() => {
-            window.removeEventListener('keydown', handleSpacebar);
+            document.removeEventListener('keydown', handleSpacebar);
         });
+        //空格键播放暂停
         function handleSpacebar(event) {
             if (event.code === 'Space' && props.isplay == props.inNum) {
-                event.preventDefault(); // 阻止默认行为
                 toggleVideo()
             }
         }
+        // 它用于监听 state.currentTime 的变化
         watch(() => state.currentTime, (newTime) => {
             state.progressBarWidth = (newTime / state.duration) * 100;
             if (state.progressBarWidth >= 100) {
@@ -119,38 +123,24 @@ export default ({
             }
 
         });
+        // 获取video总时间
         function setDuration() {
-            if (videoRef.value) {
-                state.duration = videoRef.value.duration;
-                // 获取video总时间
-            }
+            videoRef.value && (state.duration = videoRef.value.duration)
         }
-        function updateProgress(event) {
-
-
-            if (videoRef.value) {
-                event.stopPropagation(); // 阻止事件冒泡
-                event.preventDefault(); // 阻止默认行为
-                state.currentTime = videoRef.value.currentTime;
-            }
-
+        // 更新视频播放的当前时间 当视频正在播放时 state.currentTime
+        function updateProgress() {
+            videoRef.value && (state.currentTime = videoRef.value.currentTime);
         }
-        function handleMouseOver() {
-            console.log('dddddddd');
-            isShow.value = true
-        }
-        function handleMouseLeave() {
-            isShow.value = false
-        }
+        
         function handleMouseDown(event) {
             // 鼠标按下时的逻辑
             // isDragging.value = true;
-            console.log('hhhhhhhhhhhhhhhhhhh');
+            // console.log('hhhhhhhhhhhhhhhhhhh');
             event.preventDefault();
             const bar = event.currentTarget; // 1822px
             //    console.log(bar);
             const clickX = event.offsetX;
-            console.log(clickX);
+            // console.log(clickX);
             const newTime = (clickX / bar.offsetWidth) * state.duration;
             state.currentTime = newTime
             videoRef.value.currentTime = newTime;
@@ -162,7 +152,7 @@ export default ({
             const bar = event.currentTarget; // 1822px
             //    console.log(bar);
             const clickX = event.offsetX;
-            console.log(clickX);
+            // console.log(clickX);
             const newTime = (clickX / bar.offsetWidth) * state.duration;
             state.currentTime = newTime
             videoRef.value.currentTime = newTime;
@@ -197,6 +187,7 @@ export default ({
                 document.removeEventListener('mousemove', onDrag);
                 document.removeEventListener('mouseup', stopDrag);
                 event.stopPropagation();
+                isShow.value = false
             }
         };
         const formattedCurrentTime = computed(() => formatTime(state.currentTime));// 当前时间
@@ -225,8 +216,7 @@ export default ({
             handleMouseDown,
             toggleVideo,
             updateProgress,
-            handleMouseOver,
-            handleMouseLeave,
+        
 
         };
 
