@@ -23,7 +23,7 @@
 <script>
 import { RouterView } from 'vue-router';
 import Video from './video.vue'
-import { onBeforeMount, getCurrentInstance, ref, reactive, onUpdated, onMounted, nextTick, defineComponent, watch } from "vue";
+import { onBeforeMount, getCurrentInstance, ref, reactive, onUpdated, onMounted, nextTick, defineComponent, watch,provide } from "vue";
 import axios from 'axios'
 export default ({
   components: {
@@ -31,6 +31,10 @@ export default ({
     RouterView
   },
   setup() {
+    const isMuted = ref(true);
+    const isLooping = ref(true)
+    provide('isMuted', isMuted);
+    provide('isLooping', isLooping);
     const child = ref(null);
     let videolist = reactive({
       arrList: [],  // 所有视频信息
@@ -133,7 +137,7 @@ export default ({
     }
     return {
       fullpage, mouseWheelHandle, videolist, childRef, handlePlay, child, callChildMethod,
-      fullPageContainer, fullPageaa, scrollDown, scrollUp, directToMove
+      fullPageContainer, fullPageaa, scrollDown, scrollUp, directToMove,isMuted,isLooping
     }
   },
 })

@@ -1,7 +1,7 @@
 <template>
     <div class="video-container">
-        <video style="height: 90vh;" ref="videoRef" @click="toggleVideo" preload="metadata" :loop="isLooping"
-            @timeupdate="updateProgress" @contextmenu.prevent :muted="isMuted" @loadedmetadata="setDuration">
+        <video style="height: 90vh;" ref="videoRef" @click="toggleVideo" preload="metadata"  :loop="isLooping"  @timeupdate="updateProgress"
+            @contextmenu.prevent :muted="isMuted" @loadedmetadata="setDuration">
             <source type="video/mp4" :src="mp4Url" />
         </video>
         <div class="control-box">
@@ -19,7 +19,7 @@
                 <div class="left-grid">
                     <div class="play-cont">
                         <span class="play-icon">
-                            <div class="play-icon" :class="{ 'pause-icon': isPlaying }"></div>
+                            <div class="play-icon" :class="{ 'pause-icon': isplayer }"></div>
                         </span>
                     </div>
                     <div class="player-time">
@@ -42,7 +42,7 @@
                         <div class="speed-label" @mouseenter="showOptions" @mouseleave="hideOptions">倍速</div>
                     </div>
                     <div class="muted" @click="toggleMute">
-                        <div class="muted-icon" :class="{ active: isMuted }"></div>
+                        <div class="muted-icon" :class="{active : isMuted}"></div>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
     </div>
 </template>
 <script>
-import { ref, reactive, watch, onMounted, computed, onUnmounted, onBeforeUnmount, inject } from 'vue';
+import { ref, reactive, watch, onMounted, computed, onUnmounted, onBeforeUnmount,inject  } from 'vue';
 
 export default ({
     // props: ['mp4Url', 'isplay', 'inNum'],
@@ -72,7 +72,7 @@ export default ({
         const isActive = ref(false);
         const bar_cont = ref(null)
         const videoRef = ref(null);
-        const isPlaying = ref(false); // 使用ref创建响应式数据
+        const isplayer = ref(false); // 使用ref创建响应式数据
         const state = reactive({
             currentTime: 0, // 当前时间
             duration: 0,    // 总时间
@@ -122,40 +122,43 @@ export default ({
         watch(() => props.isplay, (newVal, nowVal) => {
             if (newVal >= 0) {
                 if (props.isplay == props.inNum) {
-                    isPlaying.value = true
-                    videoRef.value.play();
+                    isplayer.value = true
                     // console.log('新值:', newVal), '旧值:', nowVal;
                 } else {
-                    videoRef.value.pause();
-                    isPlaying.value = false
-
+                    isplayer.value = false
                 }
             }
         });
         function toggleSwitch() {
             isActive.value = !isActive.value;
         }
+
+        // 暂停 播放 控制
         const toggleVideo = () => {
-            if (videoRef.value.paused) {
+            if (isplayer.value == false ) {
                 videoRef.value.play();
-                isPlaying.value = true;
+                // videoRef.value.currentTime = 0;
+                isplayer.value = true
             } else {
                 videoRef.value.pause();
-                isPlaying.value = false;
+                isplayer.value = false
             }
         };
-
+        watch(isplayer, (newValue, oldValue) => {
+            if (newValue) {
+                videoRef.value.play();
+                isplayer.value = true
+            } else {
+                videoRef.value.pause();
+                isplayer.value = false
+            }
+        })
         // 组件挂载时添加事件监听
         onMounted(() => {
             document.addEventListener('keydown', handleSpacebar);
             videoRef.value.addEventListener('ended', () => {
-                isPlaying.value = false;
-            });
-            // 监听视频结束事件
-           
-
-           
-          
+        isplayer.value = false;
+    });
         });
 
         // 组件卸载时移除事件监听
@@ -171,7 +174,9 @@ export default ({
         // 它用于监听 state.currentTime 的变化
         watch(() => state.currentTime, (newTime) => {
             state.progressBarWidth = (newTime / state.duration) * 100;
-
+            // if (state.progressBarWidth >= 100) {
+            //     isplayer.value = false
+            // }
         });
         // 获取video总时间
         function setDuration() {
@@ -198,13 +203,11 @@ export default ({
             const newTime = (clickX / bar_cont.value.offsetWidth) * state.duration;
             videoRef.value.currentTime = newTime;
             state.currentTime = newTime
-            console.log('哈哈哈');
             
         };
         const startDrag = (event) => {
             event.stopPropagation(); // 阻止事件冒泡
             event.preventDefault(); // 阻止默认行为
-            
             document.addEventListener('mousemove', onDrag);
             document.addEventListener('mouseup', stopDrag);
         };
@@ -212,12 +215,7 @@ export default ({
             document.removeEventListener('mousemove', onDrag);
             document.removeEventListener('mouseup', stopDrag);
             event.stopPropagation();
-            console.log('jieshu');
-            toggleVideo()
-            // isShow.value = false
-            setTimeout(() => {
-                isShow.value = false
-            }, 100);
+            isShow.value = false
         };
         const formattedCurrentTime = computed(() => formatTime(state.currentTime));// 当前时间
         const formattedDuration = computed(() => formatTime(state.duration));// 总时间
@@ -238,7 +236,7 @@ export default ({
             formattedCurrentTime,
             formattedDuration,
             bar_cont,
-            isPlaying,
+            isplayer,
             handleMouseDown,
             toggleVideo,
             updateProgress,
@@ -252,7 +250,7 @@ export default ({
             hideTimeout,
             keepOptionsVisible,
             hideOptionsWithDelay,
-            isMuted, toggleMute, isLooping, toggleloop
+            isMuted,toggleMute,isLooping,toggleloop
         };
 
     }
@@ -480,7 +478,6 @@ export default ({
                     -moz-user-select: none;
                     -ms-user-select: none;
                     user-select: none;
-
                     .muted-icon {
                         width: 20px;
                         height: 20px;
@@ -489,8 +486,7 @@ export default ({
                         background: url('./../../public/icon_svg/muted_icon.svg');
                         background-repeat: no-repeat;
                     }
-
-                    .muted-icon.active {
+                    .muted-icon.active{
                         background: url('./../../public/icon_svg/unmuted_icon.svg');
                     }
                 }
