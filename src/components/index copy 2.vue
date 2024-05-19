@@ -1,10 +1,17 @@
+<!-- <div class="h1" @click="one">点我
+    <input type="text">
+    <router-link to="/register" active-class="active">皮蛋编程</router-link>
+  </div> -->
+<!-- <button class="main_h" @click="callChildMethod">调用子组件方法</button> -->
 <template>
   <div class="box">
+
+
     <div class="fullPage" ref="fullPageaa">
       <div class="fullPageContainer" ref="fullPageContainer" @wheel="mouseWheelHandle">
-        <Video
-          v-for="(item, index) in videolist.arrList" :inNum="index" :isplay="videolist.currentVideoIndex"
-          :mp4Url="item.file_name">
+        <Video @play="handlePlay(index)" :isPlaying="videolist.currentVideoIndex === index" ref="child"
+          @pause="handlePause(index)" v-for="(item, index) in videolist.arrList" class="btn" :inNum="index"
+          :isplay="videolist.currentVideoIndex" :mp4Url="item.file_name">
         </Video>
       </div>
     </div>
@@ -12,12 +19,14 @@
 </template>
 
 <script>
+import { RouterView } from 'vue-router';
 import Video from './video.vue'
-import { onBeforeMount, ref, reactive, provide } from "vue";
+import { onBeforeMount, getCurrentInstance, ref, reactive, onUpdated, onMounted, nextTick, defineComponent, watch, provide } from "vue";
 import axios from 'axios'
 export default ({
   components: {
     Video,
+    RouterView
   },
   setup() {
     const isMuted = ref(true);
@@ -31,11 +40,29 @@ export default ({
       everyTime: 5,
       currentVideoIndex: 0
     })
+    const childRef = ref(null);
+    const callChildMethod = () => {
+
+      // console.log('sssssss', child.value[videolist.currentVideoIndex].isplayer = false);
+
+    };
 
     onBeforeMount(() => {
       fnList()
     });
+    function handlePlay(index) {
+      // console.log(index, '撒啊啊啊啊啊啊啊啊');
+      if (videolist.currentVideoIndex !== index) {
+        videolist.currentVideoIndex = index;
+        // 暂停其他视频
+        videolist.arrList.forEach((item, idx) => {
+          if (idx !== index && item.ref && item.ref.pause) {
+            item.ref.pause();
+          }
+        });
+      }
 
+    }
     function fnList() {
       axios.get('http://localhost:3000/getVideo').then((el) => {
         console.log(el.data.item[0].author.user);
@@ -80,14 +107,20 @@ export default ({
       }
 
     }
+
+
+
     function scrollDown() {
 
       videolist.currentVideoIndex = (videolist.currentVideoIndex + 1) % videolist.arrList.length;
+      // console.log(child.value[videolist.currentVideoIndex].handleSpacebar());
       directToMove(videolist.currentVideoIndex)
     }
     function scrollUp() {
       videolist.currentVideoIndex = (videolist.currentVideoIndex - 1 + videolist.arrList.length) % videolist.arrList.length;
+      // console.log(videolist.currentVideoIndex, '上面');
       directToMove(videolist.currentVideoIndex)
+
     }
     function directToMove(index) {
       const height = fullPageaa.value.clientHeight;
@@ -97,8 +130,8 @@ export default ({
       fullpage.current = index;
     }
     return {
-      fullpage, mouseWheelHandle, videolist,
-      fullPageContainer, fullPageaa,  isMuted, isLooping
+      fullpage, mouseWheelHandle, videolist, childRef, handlePlay, child, callChildMethod,
+      fullPageContainer, fullPageaa, scrollDown, scrollUp, directToMove, isMuted, isLooping
     }
   },
 })
@@ -162,6 +195,8 @@ export default ({
   flex-direction: column;
   align-items: center;
 }
+
+.btn {}
 
 .section {
   width: 100%;

@@ -115,16 +115,13 @@ export default ({
         // 设置播放速度的函数
         const setPlaybackSpeed = (speed) => {
             // 这里应该有代码来改变视频播放器的播放速度
-
-            console.log(videoRef.value.playbackRate = parseFloat(speed));
-            console.log(`播放速度设置为: ${speed}`);
+            videoRef.value.playbackRate = parseFloat(speed)
         };
         watch(() => props.isplay, (newVal, nowVal) => {
             if (newVal >= 0) {
                 if (props.isplay == props.inNum) {
                     isPlaying.value = true
                     videoRef.value.play();
-                    // console.log('新值:', newVal), '旧值:', nowVal;
                 } else {
                     videoRef.value.pause();
                     isPlaying.value = false
@@ -198,8 +195,6 @@ export default ({
             const newTime = (clickX / bar_cont.value.offsetWidth) * state.duration;
             videoRef.value.currentTime = newTime;
             state.currentTime = newTime
-            console.log('哈哈哈');
-            
         };
         const startDrag = (event) => {
             event.stopPropagation(); // 阻止事件冒泡
@@ -212,7 +207,6 @@ export default ({
             document.removeEventListener('mousemove', onDrag);
             document.removeEventListener('mouseup', stopDrag);
             event.stopPropagation();
-            console.log('jieshu');
             toggleVideo()
             // isShow.value = false
             setTimeout(() => {
