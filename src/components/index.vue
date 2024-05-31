@@ -122,42 +122,21 @@ export default ({
 .box {
   height: 90vh;
   top: 70px;
-  flex-direction: column;
-  flex: 1;
-  display: flex;
   position: relative;
   overflow: hidden;
   background: url('../../public/wallpaper.png');
 }
 
-// .fullPage {
-//   height: 100vh; //一定要设置，保证占满
-//   overflow: hidden; //一定要设置，多余的先隐藏ss
-//   background: url('../../public/wallpaper.png');
-// }
 .fullPage {
   position: absolute;
-  left: 0;
-  top: calc(0% + 0px);
   width: 100%;
-  height: calc(100% - 0px);
-  overflow: visible;
-  padding-left: 0;
-  padding-right: 68px;
-  min-height: 455px;
+  height: calc(90vh - -1px);
 }
 
 .fullPageContainer {
   width: 100%;
   display: flex;
-
-  flex-direction: column;
-  height: 90vh;
-
-  // background:'./public/wallpaper.png' ;
-  background: #4947470a;
-  border-radius: 10px;
-  // background: url("./static/images/logo.png");
+  height: calc(90vh - -1px);
   transition: all linear 0.2s;
   flex-direction: column;
   align-items: center;

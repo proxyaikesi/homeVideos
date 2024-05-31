@@ -1,6 +1,6 @@
 <template>
     <div class="video-container">
-        <video style="height: 90vh;" ref="videoRef" @click="toggleVideo" preload="metadata" :loop="isLooping"
+        <video style="height: 100%;" ref="videoRef" @click="toggleVideo" preload="metadata" :loop="isLooping"
             @timeupdate="updateProgress" @contextmenu.prevent :muted="isMuted" @loadedmetadata="setDuration">
             <source type="video/mp4" :src="mp4Url" />
         </video>
@@ -255,8 +255,6 @@ export default ({
 
 <style scoped lang="scss">
 .video-container {
-    flex-direction: column;
-    display: flex;
     position: relative;
     height: 100%;
     width: 95%;
