@@ -2,35 +2,64 @@
   <div class="box">
     <div class="fullPage" ref="fullPageaa">
       <div class="fullPageContainer" ref="fullPageContainer" @wheel="mouseWheelHandle">
-        <Video
-          v-for="(item, index) in videolist.arrList" :inNum="index" :isplay="videolist.currentVideoIndex"
-          :mp4Url="item.file_name">
+        <Video v-for="(item, index) in videolist.arrList" :inNum="index" :isplay="videolist.currentVideoIndex"
+          :mp4Url="item.file_name" @videoMounted="handleVideoMounted(index, $event)" @play="handlePlay"
+          @pause="handlePause" :isPlaying="isPlaying">
+
         </Video>
       </div>
+      <MediaController :currentVideoIndex="videolist.currentVideoIndex" :videoRefs="videoRefs" :isPlaying="isPlaying"
+        @play="handlePlay" @pause="handlePause" ></MediaController>
     </div>
   </div>
 </template>
 
 <script>
-import Video from './video.vue'
-import { onBeforeMount, ref, reactive, provide } from "vue";
+import Video from './media/video.vue'
+import MediaController from './media/videoController.vue'
+import { onBeforeMount, ref, reactive, provide, onMounted, nextTick, onBeforeUpdate } from "vue";
 import axios from 'axios'
 export default ({
   components: {
     Video,
+    MediaController,
+
   },
+
   setup() {
-    const isMuted = ref(true);
-    const isLooping = ref(true)
-    provide('isMuted', isMuted);
-    provide('isLooping', isLooping);
-    const child = ref(null);
+    const isLooping = ref(false);
+    const MediaController = ref(null)
     let videolist = reactive({
       arrList: [],  // 所有视频信息
       newArr: [], // 默认5条累加
       everyTime: 5,
-      currentVideoIndex: 0
+      currentVideoIndex: ref(0)
     })
+    const isPlaying = ref(false);
+    const videoRefs = ref([]);
+    function handleVideoMounted(index, videoRef) {
+      videoRefs.value[index] = videoRef;
+
+    }
+    provide('videoRefs', videoRefs); // 提供 videoRefs
+    const handlePlay = () => {
+      isPlaying.value = true;
+    };
+    const handlePause = () => {
+      isPlaying.value = false;
+
+    };
+ 
+
+    const videoState = reactive({
+      currentTime: 0,
+      duration: 0,
+      progressBarWidth: 0,
+    });
+    const isMuted = ref(false);
+    provide('isMuted', isMuted);
+    provide('isLooping', isLooping);
+
 
     onBeforeMount(() => {
       fnList()
@@ -46,7 +75,7 @@ export default ({
       })
     }
     function addList(nums) {
-      let num = 0
+
       if (videolist.arrList.length > 5) {
         // console.log('ssssss啊实打实的');
         videolist.newArr = videolist.arrList.slice(0, videolist.everyTime)
@@ -98,7 +127,13 @@ export default ({
     }
     return {
       fullpage, mouseWheelHandle, videolist,
-      fullPageContainer, fullPageaa,  isMuted, isLooping
+      fullPageContainer, fullPageaa, isMuted, isLooping, videoState,
+      videoRefs,
+      handleVideoMounted,
+      isPlaying,
+      handlePlay,
+      handlePause,
+      MediaController,
     }
   },
 })
@@ -106,6 +141,11 @@ export default ({
 </script>
 
 <style scoped lang="scss">
+.Controller {
+  width: 95%;
+  height: 90px;
+}
+
 .h1 {
   color: #fff;
   position: absolute;
