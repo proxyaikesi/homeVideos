@@ -1,96 +1,107 @@
 <template>
   <div class="box">
     <div class="fullPage" ref="fullPageaa">
-      <div class="fullPageContainer" ref="fullPageContainer" @wheel="mouseWheelHandle">
-        <Video v-for="(item, index) in videolist.arrList" :inNum="index" :isplay="videolist.currentVideoIndex"
-          :mp4Url="item.file_name" @videoMounted="handleVideoMounted(index, $event)" @play="handlePlay"
-          @pause="handlePause" :isPlaying="isPlaying">
-
+      <div
+        class="fullPageContainer"
+        ref="fullPageContainer"
+        @wheel="mouseWheelHandle"
+      >
+        <Video
+          v-for="(item, index) in videolist.arrList"
+          :inNum="index"
+          :isplay="videolist.currentVideoIndex"
+          :mp4Url="item.file_name"
+          @videoMounted="handleVideoMounted(index, $event)"
+          @play="handlePlay"
+          @pause="handlePause"
+          :muted="isMuted"
+          :isPlaying="isPlaying"
+          :Looping="isLooping"
+          @isLooping="handlelooping"
+        >
         </Video>
       </div>
-      <MediaController :currentVideoIndex="videolist.currentVideoIndex" :videoRefs="videoRefs" :isPlaying="isPlaying"
-        @play="handlePlay" @pause="handlePause" ></MediaController>
+      <MediaController
+        :currentVideoIndex="videolist.currentVideoIndex"
+        :videoRefs="videoRefs"
+        :isPlaying="isPlaying"
+        @play="handlePlay"
+        @pause="handlePause"
+        @mute="handleMute"
+        @isLooping="handlelooping"
+      >
+      </MediaController>
     </div>
   </div>
 </template>
 
 <script>
-import Video from './media/video.vue'
-import MediaController from './media/videoController.vue'
-import { onBeforeMount, ref, reactive, provide, onMounted, nextTick, onBeforeUpdate } from "vue";
-import axios from 'axios'
-export default ({
+import Video from "./media/video.vue";
+import MediaController from "./media/videoController.vue";
+import { onBeforeMount, ref, reactive, provide } from "vue";
+import axios from "axios";
+export default {
   components: {
     Video,
     MediaController,
-
   },
 
   setup() {
     const isLooping = ref(false);
-    const MediaController = ref(null)
+    const isMuted = ref(false);
+    const handleMute = (mute) => {
+      isMuted.value = mute;
+    };
     let videolist = reactive({
-      arrList: [],  // 所有视频信息
+      arrList: [], // 所有视频信息
       newArr: [], // 默认5条累加
       everyTime: 5,
-      currentVideoIndex: ref(0)
-    })
+      currentVideoIndex: ref(0),
+    });
     const isPlaying = ref(false);
     const videoRefs = ref([]);
     function handleVideoMounted(index, videoRef) {
       videoRefs.value[index] = videoRef;
-
     }
-    provide('videoRefs', videoRefs); // 提供 videoRefs
+    provide("videoRefs", videoRefs); // 提供 videoRefs
     const handlePlay = () => {
       isPlaying.value = true;
     };
     const handlePause = () => {
       isPlaying.value = false;
-
     };
- 
-
-    const videoState = reactive({
-      currentTime: 0,
-      duration: 0,
-      progressBarWidth: 0,
-    });
-    const isMuted = ref(false);
-    provide('isMuted', isMuted);
-    provide('isLooping', isLooping);
-
-
+    const handlelooping = (looping) => {
+      isLooping.value = looping;
+    };
     onBeforeMount(() => {
-      fnList()
+      fnList();
     });
 
     function fnList() {
-      axios.get('http://localhost:3000/getVideo').then((el) => {
+      axios.get("http://localhost:3000/getVideo").then((el) => {
         console.log(el.data.item[0].author.user);
-        videolist.arrList = el.data.item.sort(() => 0.5 - Math.random())
+        videolist.arrList = el.data.item.sort(() => 0.5 - Math.random());
         console.log(videolist.arrList);
 
-        addList(5)
-      })
+        addList(5);
+      });
     }
     function addList(nums) {
-
       if (videolist.arrList.length > 5) {
         // console.log('ssssss啊实打实的');
-        videolist.newArr = videolist.arrList.slice(0, videolist.everyTime)
+        videolist.newArr = videolist.arrList.slice(0, videolist.everyTime);
       }
-
     }
-    const fullPageContainer = ref()
-    const fullPageaa = ref()
+    const fullPageContainer = ref();
+    const fullPageaa = ref();
     const fullpage = reactive({
       current: 1, // 当前的页面编号
       isScrolling: false, // 是否在滚动,是为了防止滚动多页，需要通过一个变量来控制是否滚动S
-      deltaY: 0 //返回鼠标滚轮的垂直滚动量，保存的鼠标滚动事件的deleteY,用来判断是往下还是往上滚
-    })
+      deltaY: 0, //返回鼠标滚轮的垂直滚动量，保存的鼠标滚动事件的deleteY,用来判断是往下还是往上滚
+    });
     let scrolling = false;
-    const mouseWheelHandle = (event) => { // 监听鼠标监听
+    const mouseWheelHandle = (event) => {
+      // 监听鼠标监听
       // 添加冒泡阻止
       if (!scrolling) {
         if (event.deltaY > 0) {
@@ -107,37 +118,43 @@ export default ({
           scrolling = false; // 1秒后设置为非滚动状态，防止连续滚动
         }, 1000);
       }
-
-    }
+    };
     function scrollDown() {
-
-      videolist.currentVideoIndex = (videolist.currentVideoIndex + 1) % videolist.arrList.length;
-      directToMove(videolist.currentVideoIndex)
+      videolist.currentVideoIndex =
+        (videolist.currentVideoIndex + 1) % videolist.arrList.length;
+      directToMove(videolist.currentVideoIndex);
     }
     function scrollUp() {
-      videolist.currentVideoIndex = (videolist.currentVideoIndex - 1 + videolist.arrList.length) % videolist.arrList.length;
-      directToMove(videolist.currentVideoIndex)
+      videolist.currentVideoIndex =
+        (videolist.currentVideoIndex - 1 + videolist.arrList.length) %
+        videolist.arrList.length;
+      directToMove(videolist.currentVideoIndex);
     }
     function directToMove(index) {
       const height = fullPageaa.value.clientHeight;
       const scrollPage = fullPageContainer.value;
-      const scrollHeight = -(index * height) + 'px';
+      const scrollHeight = -(index * height) + "px";
       scrollPage.style.transform = `translateY(${scrollHeight})`;
       fullpage.current = index;
     }
     return {
-      fullpage, mouseWheelHandle, videolist,
-      fullPageContainer, fullPageaa, isMuted, isLooping, videoState,
+      fullpage,
+      mouseWheelHandle,
+      videolist,
+      fullPageContainer,
+      fullPageaa,
+      isMuted,
+      isLooping,
       videoRefs,
       handleVideoMounted,
       isPlaying,
       handlePlay,
       handlePause,
-      MediaController,
-    }
+      handleMute,
+      handlelooping,
+    };
   },
-})
-
+};
 </script>
 
 <style scoped lang="scss">
@@ -164,7 +181,7 @@ export default ({
   top: 70px;
   position: relative;
   overflow: hidden;
-  background: url('../../public/wallpaper.png');
+  background: url("../../public/wallpaper.png");
 }
 
 .fullPage {
@@ -188,7 +205,6 @@ export default ({
   background-position: center center;
   background-repeat: no-repeat;
 }
-
 
 .section1 .secction1-content {
   color: #fff;
