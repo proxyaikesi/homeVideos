@@ -40,7 +40,7 @@
       <div class="right-grid">
         <!-- <span>{{ inNum }}</span> -->
         <div class="clear-screen" @click="toggleSwitch">
-          <div class="toggle-switch" :class="{ active: isActive }"></div>
+          <div class="toggle-switch" :class="{}"></div>
           &nbsp;清屏
         </div>
         <div class="clear-screen" @click="toggleloop">

@@ -36,8 +36,8 @@
 </template>
 
 <script>
-import Video from "./media/video.vue";
-import MediaController from "./media/videoController.vue";
+import Video from "@/components/media/video.vue";
+import MediaController from "@/components/media/videoController.vue";
 import { onBeforeMount, ref, reactive, provide } from "vue";
 import axios from "axios";
 export default {
@@ -79,7 +79,8 @@ export default {
 
     function fnList() {
       axios.get("http://localhost:3000/getVideo").then((el) => {
-        console.log(el.data.item[0].author.user);
+        // console.log(el.data.item[0].author.user);
+        console.log(el.data);
         videolist.arrList = el.data.item.sort(() => 0.5 - Math.random());
         console.log(videolist.arrList);
 

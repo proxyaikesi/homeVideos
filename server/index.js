@@ -1,72 +1,77 @@
-const express = require('express')
+// require("dotenv").config();
+const express = require("express");
 const bodyParser = require("body-parser");
-const mongoose = require('mongoose')
-const fs = require('fs')
-const uploadhome = require('./routers/uploadhome')
+const mongoose = require("mongoose");
+const fs = require("fs");
+const uploadhome = require("./routers/uploadhome");
 const uploader = require("express-fileupload");
-const db = require('./db.js')
-const puppeteer = require('puppeteer');
-
-const http = require('http')
-const request = require('request')
-const https = require('https')
-
-
-
-
-
-
+const db = require("./db.js");
+const puppeteer = require("puppeteer");
+const verifyTokenRoute = require("./routers/verifyToken");
+const authMiddleware = require("./middleware/authMiddleware"); // 确保路径正确
+const http = require("http");
+const request = require("request");
+const https = require("https");
+const cors = require("cors");
 const MAX_TRY_TIME = 30; // 未抓取到视频重试次数
 const RETRY_INTERVAL = 1000; // 未抓取到视频重试间隔 ms
 const { extname, resolve } = require("path");
 const { existsSync, appendFileSync, writeFileSync } = require("fs");
-mongoose.connect('mongodb://localhost:27017/video', {
-    useNewUrlParser: true
-})
-const app = express()
+const verifyToken = require("./routers/verifyToken");
+mongoose.connect("mongodb://localhost:27017/video", {
+  useNewUrlParser: true,
+});
+const app = express();
 
-mongoose.connection.on('connected', (error) => {
-    console.log('mongodb连接成功');
-})
+mongoose.connection.on("connected", (error) => {
+  console.log("mongodb连接成功");
+});
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(uploader({
+app.use(
+  uploader({
     createParentPath: true,
-    defParamCharset: "utf8" // 添加utf8编码
-}));
+    defParamCharset: "utf8", // 添加utf8编码
+  })
+);
 // app.use('/',express.static('upload_temp'))
-app.use('/', express.static('upload'))
+app.use("/", express.static("upload"), cors());
 
 // console.log('expressexpress',express.static(''));
 
-app.all('*', function (req, res, next) {
+app.all("*", function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Credentials", true); // 告诉客户端可以在HTTP请求中带上Cookie
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, " +
+      "Last-Modified, Cache-Control, Expires, Content-Type, Content-Language, Cache-Control, X-E4M-With,X_FILENAME"
+  );
+  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+  res.header("Content-Type", "application/json;charset=utf-8");
+  // res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
+app.post("/register", require("./routers/register")); // 注册
+app.post("/login", require("./routers/login")); // 登录
+app.post("/videoInfo", require("./routers/videoInfo")); // 视频信息上传
+app.post("/uploadhome", require("./routers/uploadhome")); // 视频上传
+app.post("/deleteInfo", require("./routers/deleteInfo")); // // 删除视频
+app.post("/videoManage", require("./routers/videoManage")); // 查找公开视频
 
-    res.header("Access-Control-Allow-Origin", req.headers.origin);
-    res.header('Access-Control-Allow-Credentials', true); // 告诉客户端可以在HTTP请求中带上Cookie
-    res.header("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, " +
-        "Last-Modified, Cache-Control, Expires, Content-Type, Content-Language, Cache-Control, X-E4M-With,X_FILENAME");
-    res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
-    res.header("Content-Type", "application/json;charset=utf-8");
-    // res.header("Access-Control-Allow-Origin", "*");
-    next();
-})
-app.post('/register', require('./routers/register')) // 注册
-app.post('/login', require('./routers/login'))  // 登录
-app.post('/videoInfo', require('./routers/videoInfo')) // 视频信息上传
-app.post('/uploadhome', require('./routers/uploadhome')) // 视频上传
-app.post('/deleteInfo', require('./routers/deleteInfo')) // // 删除视频
-app.post('/videoManage', require('./routers/videoManage')) // 查找公开视频
+app.post("/unpublished", require("./routers/Unpublished")); // 查找未公开视频
+app.post("/deleteVideoInfo", require("./routers/deleteVideoInfo")); // 删除视频信息表
+app.get("/getVideo", require("./routers/getVideo")); // 删除视频信息表
 
-app.post('/unpublished', require('./routers/Unpublished')) // 查找未公开视频
-app.post('/deleteVideoInfo', require('./routers/deleteVideoInfo')) // 删除视频信息表
-app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
+app.get("/userinfo", require("./routers/userinfo"));
+app.post("/verifyToken", require("./routers/verifyToken")); // 验证 token
 
-
+app.get("/user", authMiddleware, (req, res) => {
+  // req.user 包含通过令牌解析得到的用户信息
+  res.status(200).json(req.user);
+});
 // const superagent = require('superagent');
 // const { promises } = require('dns');
-
-
-
 
 // const { TikTokScraper } = require('tiktok-scraper');
 
@@ -83,7 +88,7 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 // scraper.setSession(session);
 
 // // Scrape videos from the username
-// scraper.user(tiktokUsername, { 
+// scraper.user(tiktokUsername, {
 //     // Number of posts to scrape
 //     number: 50,
 //     // Download video files without the watermark
@@ -99,24 +104,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //     // Handle error
 //     console.error(err);
 // });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // const options = {
 
@@ -134,10 +121,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 
 //     // agent: false,
 // };
-
-
-
-
 
 // const req = superagent
 // .get('')
@@ -167,7 +150,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 // console.log(req);
 // req.pipe(fs.createWriteStream('./222.m4s'))
 
-
 // console.log(req);
 
 // .get('https://v16-webapp-prime.tiktok.com/video/tos/alisg/tos-alisg-pve-0037/oQJwf523RM9cCsLEgFUDpDARAr8fOobSEACnfD/?a=1988&ch=0&cr=3&dr=0&lr=unwatermarked&cd=0%7C0%7C0%7C3&cv=1&br=3998&bt=1999&bti=ODszNWYuMDE6&cs=0&ds=3&ft=_RwJrB9eq8ZmoUlvic_vjuEELAhLrus&mime_type=video_mp4&qs=0&rc=ZjQ6Zzc0ZDczOTk1aWlpaEBpamc1Z2g6Zmt4bTMzODgzNEBgYS5jNmFiNS4xNC0tYV5eYSNnajE2cjRfc2RgLS1kLzFzcw%3D%3D&btag=e00088000&expire=1694096506&l=2023090708212594030538265532028BB2&ply_type=2&policy=2&signature=0b93ac708cfc713682a9ac3f01dfd97a&tk=tt_chain_token')
@@ -189,7 +171,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 // .set('Sec-Fetch-Site','same-site')
 // .set('Cookie','tt_chain_token=mSJkZxQXX0nV70oe4gjDUA==; passport_csrf_token=f0dea9d6223ef6cfc4bd74998d954d3d; passport_csrf_token_default=f0dea9d6223ef6cfc4bd74998d954d3d; passport_auth_status=58f419525d2833ef24f85c4dbcde7da8%2C; passport_auth_status_ss=58f419525d2833ef24f85c4dbcde7da8%2C; d_ticket=afedadd103dd70e5d9cbb38cf9accd8e57078; multi_sids=7199676325379130374%3A2354b8cc2126bccfa664ffda94ef03c9; cmpl_token=AgQQAPOYF-RO0rPUjd94MZ0__rU2E4acP4fZYM0kkw; sid_guard=2354b8cc2126bccfa664ffda94ef03c9%7C1693722664%7C15552000%7CFri%2C+01-Mar-2024+06%3A31%3A04+GMT; uid_tt=d4fe0b8b9f4bc4beb852f11147d520ed6e3b188743e786aede9e9d0ea0d3a246; uid_tt_ss=d4fe0b8b9f4bc4beb852f11147d520ed6e3b188743e786aede9e9d0ea0d3a246; sid_tt=2354b8cc2126bccfa664ffda94ef03c9; sessionid=2354b8cc2126bccfa664ffda94ef03c9; sessionid_ss=2354b8cc2126bccfa664ffda94ef03c9; sid_ucp_v1=1.0.0-KDdkN2JkOWI4ZGExYzI0MzQ5MGQ2NmJkNzljMGRhMzJkY2MzNTQ1MGQKIAiGiI2Aj--Y9WMQqNDQpwYYswsgDDCWx6mfBjgBQOsHEAMaCHVzZWFzdDJhIiAyMzU0YjhjYzIxMjZiY2NmYTY2NGZmZGE5NGVmMDNjOQ; ssid_ucp_v1=1.0.0-KDdkN2JkOWI4ZGExYzI0MzQ5MGQ2NmJkNzljMGRhMzJkY2MzNTQ1MGQKIAiGiI2Aj--Y9WMQqNDQpwYYswsgDDCWx6mfBjgBQOsHEAMaCHVzZWFzdDJhIiAyMzU0YjhjYzIxMjZiY2NmYTY2NGZmZGE5NGVmMDNjOQ; store-idc=useast2a; store-country-code=gb; store-country-code-src=uid; tt-target-idc=useast2a; tt-target-idc-sign=BfcfFQe5UwAc4EXaqZkl3PMGATDrn5Il_BtsSfyS_6vUobQnAqFnkHrZnFuNA7qF42_tPDQEUYZwtXsh-62QQZQxdo5PbcHrGmqogOKMbdWSQUxJCY7jflZ7AniumFD82Lq5OxVVO-2xmrAq1Z4SNAGc7MHCnhyWTzXeMkSEqgUrsfWpRhdHeXRnhaAWfrwZ_StA3AqpDx_ZmRgZHEB7ZWS77044bw7ENNv8Uyj6bcXDlgRr1imT0UDOirpm84bxAiM-U9ckU3Kw74uoa0OylHHYONEOqK8FzFJJ7fOOIYkk3DHV8h6NQ-Wp5mMOpKRelnw0CfDBbep82zDKNu4azqCamjSJHiMktsaQPkij483-NjilnwegRnrX5TT10BiQ1vgwsk5t0DLGBkc_lXlgpBTnmCWfLL4HjPCBOoRFzICx_PPqTY8CsE5J8AQBq_bHPVa87mijUMdU8kYIL5w6F9ECjC-ZrDhLjbhuthRwutSIL05MrPYB_-HzFWWl9wlx; tt_csrf_token=v3I9Kewz-TzHYoHIj4WGp5WMpYDXWUMl5GtM; ttwid=1%7C9SN6h7CkavLKyaLMWJXV6ZUL40V9E4tUqRXcre3qxc8%7C1694081251%7C1f82f83e402ec666e3b0118863c809f0e9a9c6c14e96e72dbe1d629c42f0eef7; odin_tt=c14980f06fb5948075fbcf21575edfe7f2ae5e491faefd0f46c27c20105cf56d2cefcbc49003d5cf395209b20d623003f579c40d210fde94ffae0bba8789b597d7831162b07409f824ee8e6323bf0d07; msToken=XT9P4I8WOcGmFBafTNKcZ9_WAXU-ikRVbyMypxTAGMzWTe4ZJ5iBXP36ZwvpreMcmAhJ5PUGX5yNyiooPm5IUnZ5Ow13uBpsuvAq-w7OZMcB4uvdOIHVstVTdfHBJkz-eprqrHrhePkp_3Cdeg==')
 
-
 // const req = superagent
 // .get('https://v39-as.tiktokcdn.com/295800e48d01874be6182cd68e47bc4a/64f9c9c7/video/tos/useast2a/tos-useast2a-ve-0068c001-euttp/oonEkDQnQWIB33O8bIkRDgAiQkfep3Iw52Ju4P/?a=1180&ch=0&cr=13&dr=0&lr=all&cd=0%7C0%7C0%7C&cv=1&br=4462&bt=2231&bti=OHYpOTY0Zik7OzlmOm01MzE6ZC4xMDo%3D&cs=0&ds=6&ft=ARfugB8vq8Zmo_hUic_vjwm6echLrus&mime_type=video_mp4&qs=0&rc=OGVkPGdkOzY4aDxoOjpnNkBpM2VobTs6ZndzbTMzZjczM0BgYzUzM2NhNjAxLzAzMmJeYSMxYm9ocjRnb2NgLS1kMWNzcw%3D%3D&l=202309070701432D3E71073DE0530B5787&btag=e00088000')
 // .set('Referer','https://www.tiktok.com/')
@@ -202,27 +183,12 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 
 // req.pipe(fs.createWriteStream('./6666666666666666666.mp4'))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // const req = superagent
 //     .get('https://s8.fsvod1.com/20230606/C9ckgaRg/1500kb/hls/index.m3u8')
 //     .set('Referer', 'http://www.nnlfj.com/')
 //     .set('Origin', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36')
 
-
 // req.pipe(fs.createWriteStream('./wahhh.txt'))
-
 
 // fs.readFile('./wahhh.txt', (err, data) => {
 //     if (err) throw err;
@@ -265,7 +231,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //             executeRequests(requests);
 //         }, 3000);
 
-
 //     }
 
 //     // 调用函数，开始执行请求
@@ -277,8 +242,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //     }, 5000);
 // }
 
-
-
 // 定义要写入的数据
 // let data = '';
 
@@ -287,7 +250,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //     // 每次循环，拼接一个hell加上数字，再加上换行符
 
 //         data += `file 'all${i}.ts' \n`;
-
 
 // }
 
@@ -302,9 +264,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //         console.log('文件创建成s功');
 //     }
 // });
-
-
-
 
 // 解密ts加密视频 start
 
@@ -325,25 +284,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 // fs.writeFileSync('video_decrypted.ts', decryptedContent);
 
 // 解密ts加密视频 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // const getListFile = '';
 // function getList() {
@@ -375,11 +315,9 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 
 //     })
 
-
 // }
 
 // // getList()
-
 
 // // 引入 request 模块
 // const request = require("request");
@@ -403,7 +341,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //         file.close();
 //     });
 // });
-
 
 // // 假设 urls 是一个包含 https 请求的 url 的数组
 // // 假设 dir 是一个保存图片的目录
@@ -435,9 +372,6 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //     downloadImage(url, dir);
 // });
 
-
-
-
 //************************************************************
 // 合并ts视频
 
@@ -450,17 +384,11 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //   console.log('视频已合并。')
 // })
 
+//************************************************************
 
 //************************************************************
 
-
-
-
-
-
-//************************************************************
-
-// request.get 获取的二进制丢失 
+// request.get 获取的二进制丢失
 // let url = 'https://s8.fsvod1.com/20230606/C9ckgaRg/index.m3u8'
 // var agent = new https.Agent({
 //     path: url,
@@ -494,74 +422,33 @@ app.get('/getVideo', require('./routers/getVideo')) // 删除视频信息表
 //     }
 // })
 
-
 //************************************************************
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-app.listen(3000)
-console.log('server is running 3000');
+app.listen(3000);
+console.log("server is running 3000");
 
 // node 爬虫
 // fn()
 function fn() {
-    (async () => {
-        const browser = await puppeteer.launch({
-            headless: false, // 是否无头浏览
-        });
-        const page = await browser.newPage();
+  (async () => {
+    const browser = await puppeteer.launch({
+      headless: false, // 是否无头浏览
+    });
+    const page = await browser.newPage();
 
-        // await page.goto('https://www.douyin.com/user/self?modal_id=7269349780550110518&showTab=like');
-        await page.goto('https://v.douyin.com/ieYE9K26/');
+    // await page.goto('https://www.douyin.com/user/self?modal_id=7269349780550110518&showTab=like');
+    await page.goto("https://v.douyin.com/ieYE9K26/");
 
-        await page.waitForSelector('xg-video-container > video > source:nth-child(1)')
+    await page.waitForSelector(
+      "xg-video-container > video > source:nth-child(1)"
+    );
 
-        await page.$$eval(
-            "xg-video-container > video > source:nth-child(1)",
-            (links) => links.map((x => x.src))
-        ).then((element) => {
-            console.log('sxcvxcfxxcv', element);
-        })
-
-    })()
+    await page
+      .$$eval("xg-video-container > video > source:nth-child(1)", (links) =>
+        links.map((x) => x.src)
+      )
+      .then((element) => {
+        console.log("sxcvxcfxxcv", element);
+      });
+  })();
 }

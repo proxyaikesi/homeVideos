@@ -1,29 +1,29 @@
-import { createApp } from "vue"
-import App from './App.vue'
-import router from './router'
-import qs from 'qs'
+import { createApp } from "vue";
+import App from "./App.vue";
+import router from "./router";
 
-import element from 'element-plus';
-import 'element-plus/theme-chalk/index.css'
-import store from './store/index'
-import locale from 'element-plus/dist/locale/zh-cn.mjs'
-// import 'swiper/css';
-// import VueAMap from "vue-amap";
+import axios from "axios";
 
+import element from "element-plus";
+import "element-plus/theme-chalk/index.css";
+import store from "./store/index";
+// import "./axios.js"; // 引入 axios.js
+import locale from "element-plus/dist/locale/zh-cn.mjs";
 
+async function init() {
+  try {
+    // 在应用启动时验证令牌
+    await store.dispatch("verifyToken");
+  } catch (error) {
+    console.error("Token verification failed:", error);
+  }
 
+  // 创建并挂载 Vue 实例
+  const app = createApp(App);
 
+  // app.use(store).use(router).use(element, { locale }).mount("#app");
+  app.use(store).use(router).use(element).mount("#app");
+}
 
-// import * as echarts from 'echarts'
-
-
-// import echarts from './echarts/index'
-const app = createApp(App)
-
-// app.config.globalProperties.$echarts = echarts
-app.use(store).use(router, qs,).use().use(element,{locale}).mount('#app')
-// VueAMap.initAMapApiLoader({
-//     key: 'b10ba7467979b474bd30bc1c313fd58a',
-//     plugin: ['AMap.Scale', 'AMap.OverView', 'AMap.ToolBar', 'AMap.MapType',],
-//     v: '1.4.4'
-//   });
+// 调用初始化函数
+init();

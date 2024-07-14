@@ -1,37 +1,56 @@
-import { createStore } from 'vuex'
-const store = createStore({
+import { createStore } from "vuex";
+// import createPersistedState from "vuex-persistedstate";
+import { loginApi, verifyToken } from "../api/auth"; // 注意: 这里确保 loginApi 的导入路径正确
+export default createStore({
   state: () => ({
-    loginStatus: 'false',
-    userInfo: {},
-    projectTitleId: [],
+    user: null,
+    token: localStorage.getItem("token") || "",
+    isAuthenticated: false,
   }),
-  getters: {
-    projectTitleId: state => state.system.projectTitleId,
-
-  },
 
   mutations: {
-    SET_PROJECTTITLEID: (state, projectTitleId) => {
-      state.projectTitleId = projectTitleId
+    setToken(state, token) {
+      state.token = token;
+      localStorage.setItem("token", token);
     },
-    user_login(state, user) {
-      state.loginStatus = false;
-      console.log('useruseruseruser',user);
-      state.userInfo = user.data
-      localStorage.setItem('teaUserInfo', JSON.stringify(user.data))
+    clearToken(state) {
+      state.token = "";
+      state.isAuthenticated = false;
+      localStorage.removeItem("token");
     },
-
-    init_user(state) {
-      let userInfo = JSON.parse(localStorage.getItem('teaUserInfo'))
-      if (userInfo) {
-        state.userInfo = Object.assign(userInfo)
-        state.loginStatus = false;
-      }
-    }
+    setUser(state, user) {
+      state.user = user;
+    },
+    setAuthenticated(state, status) {
+      state.isAuthenticated = status;
+    },
   },
   actions: {
+    async login({ commit }, { username, password, type }) {
+      const response = await loginApi(username, password, type);
+      commit("setToken", response.data.token);
+      commit("setUser", response.data.user);
+    },
+    async verifyToken({ commit }) {
+      try {
+        const response = await verifyToken();
+        if (response.data.valid) {
+          commit("setAuthenticated", true);
+        } else {
+          commit("clearToken");
+        }
+      } catch (error) {
+        commit("clearToken");
+        throw error; // 可以选择抛出错误供调用者处理
+      }
+    },
+    logout({ commit }) {
+      commit("clearToken");
+    },
+  },
 
-  }
-
-})
-export default store
+  getters: {
+    isAuthenticated: (state) => state.isAuthenticated,
+    user: (state) => state.user,
+  },
+});
